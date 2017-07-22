@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context-4.3.xsd
+          http://www.springframework.org/schema/mvc
+          http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+
+    <!-- 注解扫描包 , 多个写法:cn.hong.*.action.*, (以完成bean创建和自动依赖注入的功能)-->
+    <context:component-scan base-package="tech.shann.*" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+        <!-- springMVC配置文件中将Service注解给去掉 -->
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" />
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+    </context:component-scan>
+
+    <!-- <context:component-scan /> -->
+    <!-- 扫描指定的包中的类上的注解，常用的注解有： -->
+    <!-- @Controller 声明Action组件 -->
+    <!-- @Service 声明Service组件 @Service("xxxService") -->
+    <!-- @Repository 声明Dao组件 -->
+    <!-- @Component 泛指组件, 当不好归类时. -->
+    <!-- @RequestMapping("/menu") 请求映射 -->
+    <!-- @Resource 用于注入，( j2ee提供的 ) 默认按名称装配，@Resource(name="beanName") -->
+    <!-- @Autowired 用于注入，(spring提供的) 默认按类型装配 -->
+    <!-- @Transactional( rollbackFor={Exception.class}) 事务管理 -->
+    <!-- @ResponseBody将内容或对象作为 HTTP 响应正文返回，并调用适合HttpMessageConverter的Adapter转换对象，写入输出流 -->
+    <!-- @Scope("prototype") 设定bean的作用域 -->
+
+
+    <!-- 启用spring mvc 注解 -->
+    <!-- <context:annotation-config /> -->
+
+    <!-- 开启注解方案1 -->
+    <!-- 注解方法处理 -->
+    <!-- <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" /> -->
+    <!-- 注解类映射处理 -->
+    <!-- <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" /> -->
+
+    <!-- 开启注解方案2 -->
+    <!-- FastJson注入 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <!-- 避免IE执行AJAX时,返回JSON出现下载文件 -->
+            <!-- FastJson -->
+            <bean id="fastJsonHttpMessageConverter"
+                  class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <!-- 这里顺序不能反，一定先写text/html,不然ie下出现下载提示 -->
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+                <property name="features">
+                    <array value-type="com.alibaba.fastjson.serializer.SerializerFeature">
+                        <!-- 避免循环引用 -->
+                        <value>DisableCircularReferenceDetect</value>
+                        <!-- 兼容浏览器js WORKER_ID的LONG精度问题 -->
+                        <value>BrowserCompatible</value>
+                        <!-- 是否输出值为null的字段 -->
+                        <value>WriteMapNullValue</value>
+                        <!-- 数值字段如果为null,输出为0,而非null -->
+                        <value>WriteNullNumberAsZero</value>
+                        <!-- 字符类型字段如果为null,输出为"",而非null  -->
+                        <value>WriteNullStringAsEmpty</value>
+                        <!-- List字段如果为null,输出为[],而非null -->
+                        <value>WriteNullListAsEmpty</value>
+                        <!-- Boolean字段如果为null,输出为false,而非null -->
+                        <value>WriteNullBooleanAsFalse</value>
+                    </array>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+
+
+    <!-- 静态资源访问，方案1 -->
+    <!--<mvc:resources mapping="/static/**" location="/static/" />
+        <mvc:resources mapping="/images/**" location="/WEB-INF/images/" />
+        <mvc:resources mapping="/css/**" location="/WEB-INF/css/" />
+        <mvc:resources mapping="/js/**" location="/WEB-INF/js/" />-->
+
+    <!-- 静态资源访问，方案2 (表示不对静态资源如CSS、JS、HTML等进行拦截) -->
+    <mvc:default-servlet-handler />
+
+
+    <!-- 视图解释类 -->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/page/"></property>
+        <!--可为空,方便实现自已的依据扩展名来选择视图解释类的逻辑 -->
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+    <!-- 文件上传配置 -->
+    <!--<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
+        <!--<property name="defaultEncoding">-->
+            <!--<value>UTF-8</value>-->
+        <!--</property>-->
+        <!--<property name="maxUploadSize">-->
+            <!--<value>104857600</value> &lt;!&ndash; 100M  1024 * 1024 * 100 &ndash;&gt;-->
+        <!--</property>-->
+        <!--<property name="maxInMemorySize">-->
+            <!--<value>4096</value>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!-- 拦截器 -->
+    <!--<mvc:interceptors>
+        &lt;!&ndash; <mvc:interceptor>
+            <mvc:mapping path="/**" />
+            <bean class="com.weixin.core.interceptors.EncodingInterceptor" />
+        </mvc:interceptor> &ndash;&gt;
+        <mvc:interceptor>
+            <mvc:mapping path="/**" />
+            <bean class="com.zsx.core.interceptors.AuthInterceptor">
+                &lt;!&ndash; 不需要权限验证的地址  &ndash;&gt;
+                <property name="excludeUrls">
+                    <list>
+                        <value>wechat</value>&lt;!&ndash; 登录页面 &ndash;&gt;
+                        <value>checkname</value>&lt;!&ndash; 注册时检查用户名是否重复 &ndash;&gt;
+                        <value>register</value>&lt;!&ndash; 注册页面 &ndash;&gt;
+                        <value>login</value>&lt;!&ndash; 登录操作 &ndash;&gt;
+                        <value>logout</value>&lt;!&ndash; 登出操作 &ndash;&gt;
+                        <value>validatecode</value>&lt;!&ndash; 生成验证码 &ndash;&gt;
+                        <value>user/getUserList</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>-->
+</beans>

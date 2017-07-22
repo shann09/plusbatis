@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tech.shann.entity.mapper.UserMapper">
+
+  <select id="selectPage0" resultType="User">
+    select * from sys_user
+  </select>
+
+  <select id="selectPage3" resultType="tech.shann.entity.User">
+    select uu.*,uc.sex_count
+    from sys_user uu, (select u.sex,count(*) as sex_count from sys_user u group by u.sex) uc
+    where uu.sex = uc.sex
+  </select>
+
+  <select id="selectPage2" resultType="User">
+    SELECT u.*,uc.company_id,c.company_name
+    FROM sys_user u
+    left join user_company uc on (u.id = uc.user_id)
+    left join company c on (uc.company_id = c.id)
+    WHERE
+      1=1
+      and c.company_name in (
+        select company_name from company where id in (1,2)
+      )
+  </select>
+
+  <select id="selectBind" resultType="User">
+    <bind name="pattern" value="'%' + namePart + '%'"/>
+    SELECT *
+    FROM sys_user u
+    WHERE user_name like #{pattern}
+  </select>
+
+  <select id="selectIn" resultType="User">
+    SELECT *
+    FROM sys_user u
+    WHERE id in
+    <foreach item="item" index="index" collection="list"
+             open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+
+  <select id="selectIf" resultType="User">
+    select * from sys_user
+    where 1=1
+    <if test="sex != null">
+      and sex = ${sex.value}
+    </if>
+    <if test="mobile != null and mobile.length == 9">
+      and mobile = ${mobile}
+    </if>
+  </select>
+
+  <delete id="deleteUser">
+    delete from sys_user where mobile=#{mobile}
+  </delete>
+
+  <update id="updateUser4">
+    update sys_user
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="userName != null">user_name=#{userName},</if>
+      <if test="mobile != null">mobile=#{mobile},</if>
+      <if test="sex != null">sex=#{sex.value},</if>
+      <if test="createTime != null">create_time=#{createTime}</if>
+    </trim>
+    where id=#{id}
+  </update>
+
+  <update id="updateUser3">
+    update sys_user
+    <set>
+      <if test="userName != null">user_name=#{userName},</if>
+      <if test="mobile != null">mobile=#{mobile},</if>
+      <if test="sex != null">sex=#{sex.value},</if>
+      <if test="createTime != null">create_time=#{createTime}</if>
+    </set>
+    where id=#{id}
+  </update>
+
+
+  <update id="updateUser2">
+    update sys_user set
+    user_name = concat(user_name,'_',#{suffix})
+    where sex = ${sex.value}
+  </update>
+
+  <update id="updateUser1">
+    update sys_user set
+    user_name = #{userName},
+    sex = ${sex.value}
+    where id = #{id}
+  </update>
+
+  <insert id="insertUser1" useGeneratedKeys="true" keyColumn="id">
+    insert into sys_user (user_name,mobile,create_time,sex,money,min_money,max_money)
+    values
+    <foreach item="user" collection="list" separator=",">
+      (#{user.userName},#{user.mobile},#{user.createTime},${user.sex.value},
+       #{user.money},#{user.minMoney},#{user.maxMoney})
+    </foreach>
+  </insert>
+
+  <insert id="insertUser0" useGeneratedKeys="true" keyColumn="id">
+    insert into sys_user (user_name,mobile,create_time,sex,money,min_money,max_money)
+    values (#{userName},#{mobile},#{createTime},${sex.value},
+            #{money},#{minMoney},#{maxMoney})
+  </insert>
+
+  <select id="selectUserModel0" resultType="tech.shann.entity.User">
+    SELECT u.*,uc.company_id
+    FROM sys_user u
+    left join user_company uc on (u.id = uc.user_id)
+    WHERE u.id = #{id}
+  </select>
+
+  <select id="selectUser3" resultType="User">
+    select * from sys_user where id = #{id}
+  </select>
+
+  <select id="selectUser2" resultType="User">
+    <![CDATA[
+      select * from sys_user where id = #{id} and sex = ${sex.value}
+    ]]>
+  </select>
+
+  <!-- 这里resultType配合 mybatis-config.xml 中的 typeAliases -->
+  <select id="selectUser1" resultType="User">
+    select * from sys_user where id = #{id} and sex = ${sex.value}
+  </select>
+
+  <select id="selectUser0" resultType="tech.shann.entity.User">
+    select * from sys_user where id = #{id}
+  </select>
+
+  <select id="selectSingleColumn2" resultType="java.lang.String">
+    select user_name from sys_user
+  </select>
+
+  <select id="selectSingleColumn3" resultType="java.lang.Long">
+    select id from sys_user
+  </select>
+
+</mapper>

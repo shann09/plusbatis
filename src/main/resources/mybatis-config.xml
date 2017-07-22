@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!--
+    In the configuration file,
+    plugins location must meet the requirements as the following order:
+    properties?, settings?,
+    typeAliases?, typeHandlers?,
+    objectFactory?,objectWrapperFactory?,
+    plugins?,
+    environments?, databaseIdProvider?, mappers?
+-->
+<configuration>
+  <properties resource="config.properties">
+    <property name="username" value="root"/>
+    <property name="password" value="root"/>
+  </properties>
+  <settings>
+    <setting name="cacheEnabled" value="true"/>
+    <setting name="lazyLoadingEnabled" value="true"/>
+    <setting name="multipleResultSetsEnabled" value="true"/>
+    <setting name="useColumnLabel" value="true"/><!--这个为true-->
+    <setting name="mapUnderscoreToCamelCase" value="true"/><!--这个也为true，字段就不需要写名称映射的注解，xml不需要写名称映射的resultMap-->
+    <setting name="useGeneratedKeys" value="true"/>
+    <setting name="autoMappingBehavior" value="PARTIAL"/>
+    <setting name="autoMappingUnknownColumnBehavior" value="WARNING"/>
+    <setting name="defaultExecutorType" value="REUSE"/>
+    <setting name="defaultStatementTimeout" value="25"/>
+    <setting name="defaultFetchSize" value="100"/>
+    <setting name="safeRowBoundsEnabled" value="false"/>
+    <setting name="localCacheScope" value="SESSION"/>
+    <setting name="jdbcTypeForNull" value="OTHER"/>
+    <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
+    <setting name="logImpl" value="LOG4J"/>
+  </settings>
+  <typeAliases>
+    <typeAlias alias="User" type="tech.shann.entity.User"/>
+  </typeAliases>
+  <typeHandlers>
+    <typeHandler handler="tech.shann.entity.enums.IntEnumTypeHandler" javaType="tech.shann.entity.enums.Sex"/>
+  </typeHandlers>
+  <plugins>
+    <!--<plugin interceptor="com.github.pagehelper.PageInterceptor">-->
+      <!--&lt;!&ndash; config params as the following &ndash;&gt;-->
+      <!--<property name="helperDialect" value="mysql"/>-->
+      <!--<property name="rowBoundsWithCount" value="true"/>-->
+    <!--</plugin>-->
+    <plugin interceptor="com.baomidou.mybatisplus.plugins.PaginationInterceptor">
+      <property name="localPage" value="true" />
+    </plugin>
+  </plugins>
+  <environments default="develop">
+    <environment id="develop">
+      <transactionManager type="JDBC"/>
+      <dataSource type="POOLED">
+        <property name="driver" value="${database.driver}"/>
+        <property name="url" value="${database.url}"/>
+        <property name="username" value="${database.username}"/>
+        <property name="password" value="${database.password}"/>
+      </dataSource>
+    </environment>
+  </environments>
+  <mappers>
+    <!--指定class的mapper，mybatis会自动到找同名路径的xml，
+    maven打包时会自动合并resources和src到相应的classpath目录下-->
+    <mapper class="tech.shann.entity.mapper.UserMapper"/>
+    <mapper class="tech.shann.entity.mapper.CompanyMapper"/>
+
+    <!--额外指定mapper.xml，一般不用这个指定-->
+    <!--<mapper resource="mapper/UserMapper.xml"/>-->
+  </mappers>
+</configuration>
